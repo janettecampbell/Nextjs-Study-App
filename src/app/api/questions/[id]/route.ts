@@ -84,12 +84,12 @@ export async function PUT(
     );
 
     if (!updatedQuestion) {
-      return res.status(404).json({ message: "Question not found" });
+      return NextResponse.json({ message: "Question not found" }, { status: 404 });
     }
 
-    res.json(updatedQuestion);
+    return NextResponse.json(updatedQuestion);
   } catch (error) {
-    res.status(500).json({ message: "Error updating question", error });
+    return NextResponse.json({ message: "Error updating question", error }, { status: 500 });
   }
 }
 
