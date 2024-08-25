@@ -2,32 +2,55 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
+.form {
+  margin: 35vh auto;
+  width: 800px;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
-  }
+.modal-overlay {
+  z-index: 1000;
 }
 
-body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+.modal-container {
+  z-index: 1100;
+  max-width: 500px;
+  width: 100%;
 }
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
+.modal-content {
+  z-index: 1100;
+  background: white;
+  padding: 1.5rem;
+  border-radius: 0.5rem;
+  position: relative;
+}
+
+.card {
+  width: 300px; /* Set a fixed width for the card */
+  height: 200px; /* Set a fixed height for the card */
+  perspective: 1000px; /* Enable 3D perspective */
+  cursor: pointer; /* Change cursor to pointer on hover */
+}
+
+.card-inner {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transition: transform 0.6s; /* Smooth transition for flip effect */
+  transform-style: preserve-3d; /* Preserve 3D space for children */
+}
+
+.card.flipped .card-inner {
+  transform: rotateY(180deg); /* Flip the card */
+}
+
+.card-front, .card-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden; /* Hide the back face when flipped */
+}
+
+.card-back {
+  transform: rotateY(180deg); /* Rotate back face to be hidden initially */
 }
