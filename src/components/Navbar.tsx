@@ -26,7 +26,7 @@ const Navbar = () => {
   return (
     <nav className="p-4 bg-blue-500 text-white">
       <div className="container mx-auto flex justify-between items-center">
-        <Link href="/" className="text-lg font-bold">
+        <Link href="/home" className="text-lg font-bold">
           Study App
         </Link>
         <div>

@@ -41,6 +41,7 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
 
   return (
     <div className="modal-content">
+      <h2>Add Question</h2>
       <form
         onSubmit={handleSubmit}
         className="flex flex-col space-y-4 p-4 bg-white rounded shadow-md"

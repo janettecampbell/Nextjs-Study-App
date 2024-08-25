@@ -4,6 +4,17 @@ import userReducer from './slices/userSlice';
 import questionReducer from './slices/questionSlice';
 import authReducer from './slices/authSlice';
 
+export interface User {
+  _id: string;
+  name: string;
+  email: string;
+
+}
+
+export interface UserState {
+  user: User | null;
+}
+
 // Create the Redux store
 const store = configureStore({
   reducer: {

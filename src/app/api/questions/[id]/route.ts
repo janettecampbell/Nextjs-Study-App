@@ -1,8 +1,13 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
-import { NextResponse } from "next/server"; 
-import dbConnect from '@/lib/mongodb';
-import Question from '@/models/Question';
+import { NextResponse } from "next/server";
+import dbConnect from "@/lib/mongodb";
+import Question from "@/models/Question";
 
+// Connect to the database
+const connectToDatabase = async () => {
+  await dbConnect();
+};
+
+// Handle POST request
 export async function POST(req: Request) {
   try {
     const { question, answer, difficulty, summary } = await req.json();
@@ -26,45 +31,90 @@ export async function POST(req: Request) {
   }
 }
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const { id } = req.query;
+// Handle GET request
+export async function GET(
+  req: Request,
+  { params }: { params: { id: string } }
+) {
+  const { id } = params;
 
-  await dbConnect();
+  await connectToDatabase();
 
-  switch (req.method) {
-    case 'GET':
-      try {
-        const question = await Question.findById(id);
-        if (!question) return res.status(404).json({ message: 'Question not found.' });
-        res.status(200).json(question);
-      } catch (error) {
-        res.status(500).json({ message: 'Internal server error.' });
-      }
-      break;
+  try {
+    const question = await Question.findById(id);
+    if (!question)
+      return NextResponse.json(
+        { message: "Question not found." },
+        { status: 404 }
+      );
+    return NextResponse.json(question);
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json(
+      { message: "Internal server error." },
+      { status: 500 }
+    );
+  }
+}
 
-    case 'PUT':
-      try {
-        const { question, answer, difficulty, summary } = req.body;
-        const updatedQuestion = await Question.findByIdAndUpdate(id, { question, answer, difficulty, summary }, { new: true });
-        if (!updatedQuestion) return res.status(404).json({ message: 'Question not found.' });
-        res.status(200).json(updatedQuestion);
-      } catch (error) {
-        res.status(500).json({ message: 'Internal server error.' });
-      }
-      break;
+// Handle PUT request
+export async function PUT(
+  req: Request,
+  { params }: { params: { id: string } }
+) {
+  const { id } = params;
 
-    case 'DELETE':
-      try {
-        const deletedQuestion = await Question.findByIdAndDelete(id);
-        if (!deletedQuestion) return res.status(404).json({ message: 'Question not found.' });
-        res.status(200).json({ message: 'Question deleted.' });
-      } catch (error) {
-        res.status(500).json({ message: 'Internal server error.' });
-      }
-      break;
+  await connectToDatabase();
 
-    default:
-      res.status(405).end();
-      break;
+  try {
+    const { question, answer, difficulty, summary, userId, note } =
+      await req.json();
+
+    // Update the question document
+    const updatedQuestion = await Question.findByIdAndUpdate(
+      id,
+      {
+        question,
+        answer,
+        difficulty,
+        summary,
+        notes: { userId, note },
+      },
+      { new: true }
+    );
+
+    if (!updatedQuestion) {
+      return res.status(404).json({ message: "Question not found" });
+    }
+
+    res.json(updatedQuestion);
+  } catch (error) {
+    res.status(500).json({ message: "Error updating question", error });
+  }
+}
+
+// Handle DELETE request
+export async function DELETE(
+  req: Request,
+  { params }: { params: { id: string } }
+) {
+  const { id } = params;
+
+  await connectToDatabase();
+
+  try {
+    const deletedQuestion = await Question.findByIdAndDelete(id);
+    if (!deletedQuestion)
+      return NextResponse.json(
+        { message: "Question not found." },
+        { status: 404 }
+      );
+    return NextResponse.json({ message: "Question deleted." }, { status: 200 });
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json(
+      { message: "Internal server error." },
+      { status: 500 }
+    );
   }
 }

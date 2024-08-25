@@ -15,6 +15,16 @@ interface Question {
 const Home = () => {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [difficultyFilter, setDifficultyFilter] = useState<'beginner' | 'intermediate' | 'expert' | ''>('');
+
+  const handleDifficultyChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setDifficultyFilter(event.target.value as 'beginner' | 'intermediate' | 'expert' | '');
+  };
+
+  // Filter questions based on selected difficulty
+  const filteredQuestions = difficultyFilter
+    ? questions.filter((question) => question.difficulty === difficultyFilter)
+    : questions;
 
   const openModal = () => {
     setIsModalOpen(true);
@@ -28,6 +38,13 @@ const Home = () => {
     if (e.target === e.currentTarget) {
       closeModal();
     }
+  };
+
+  const handleDeleteQuestion = (id: any) => {
+    // Update the state to remove the deleted question
+    setQuestions((prevQuestions) =>
+      prevQuestions.filter((question) => question._id !== id)
+    );
   };
 
   const onAddQuestion = (newQuestion: Question) => {
@@ -53,11 +70,6 @@ const Home = () => {
     fetchQuestions();
   }, []);
 
-  // Function to add a new question to the state
-  // const addNewQuestion = (newQuestion: Question) => {
-  //   setQuestions((prevQuestions) => [...prevQuestions, newQuestion]);
-  // };
-
   return (
     <div className="container mx-auto p-4">
       <button
@@ -67,6 +79,14 @@ const Home = () => {
       >
         Add Question
       </button>
+      <label htmlFor="difficulty" className="ml-5">Choose difficulty level: </label>
+      <select className="border" id="difficulty" value={difficultyFilter} onChange={handleDifficultyChange}>
+        <option value="">All</option>
+        <option value="beginner">Beginner</option>
+        <option value="intermediate">Intermediate</option>
+        <option value="expert">Expert</option>
+      </select>
+
       {isModalOpen && (
         <div
           className="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center"
@@ -79,8 +99,8 @@ const Home = () => {
       )}
       <h1 className="text-2xl font-bold mb-4">All Questions</h1>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {questions.map((question: any) => (
-          <QuestionCard key={question._id} question={question} />
+        {filteredQuestions.map((question: any) => (
+          <QuestionCard key={question._id} question={question} onDelete={handleDeleteQuestion} />
         ))}
       </div>
     </div>

@@ -15,12 +15,6 @@ const UserSchema = new Schema({
     type: String,
     required: true,
   },
-  notes: [
-    {
-      questionId: { type: Schema.Types.ObjectId, ref: "Question" },
-      note: String,
-    },
-  ],
 });
 
 const User = models.User || model("User", UserSchema);

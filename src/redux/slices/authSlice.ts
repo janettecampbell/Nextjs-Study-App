@@ -4,6 +4,7 @@ import Cookies from "js-cookie";
 
 // Define the types for the user and authentication state
 interface User {
+  _id: string;
   name: string;
   email: string;
 }
@@ -24,8 +25,6 @@ const initialState: AuthState = {
   loading: false,
   error: null,
 };
-const allCookies = document.cookie
-console.log(allCookies);
 
 // Asynchronous thunk action for logging in
 export const login = createAsyncThunk<
