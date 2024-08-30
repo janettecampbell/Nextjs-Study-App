@@ -6,7 +6,7 @@ import axios from "axios";
 import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
 import { AppDispatch } from "@/redux/store";
-import { setUser, logout, loadUser } from "@/redux/slices/authSlice";
+import { setAuthUser, logout, loadUser } from "@/redux/slices/authSlice";
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
   const dispatch: AppDispatch = useDispatch();
@@ -35,10 +35,10 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
       // Fetch the user details from the backend
       axios.get("/api/auth/me")
         .then((response) => {
-          
+          console.log("resopnse.data.user", response.data.user)
           if (response.data.user) {
             // Dispatch an action to set the user in the Redux store
-            dispatch(setUser({ user: response.data.user }));
+            dispatch(setAuthUser({ user: response.data.user }));
           } else {
             // If there's no user, log them out
             dispatch(logout());

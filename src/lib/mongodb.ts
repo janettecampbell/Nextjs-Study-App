@@ -12,10 +12,7 @@ export default async function dbConnect() {
   }
 
   try {
-    await mongoose.connect(MONGODB_URI as string, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    } as ConnectOptions);
+    await mongoose.connect(MONGODB_URI as string, {} as ConnectOptions);
 
     console.log('MongoDB connected successfully');
   } catch (error) {

@@ -1,9 +1,10 @@
 "use client";
 import { useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import Link from "next/link";
 import UpdateQuestionForm from "./UpdateQuestionForm";
-import { RootState } from "@/redux/store";
+import { RootState, AppDispatch } from "@/redux/store";
+import { updateQuestionThunk } from "@/redux/slices/questionSlice";
 
 interface QuestionCardProps {
   question: {
@@ -12,21 +13,21 @@ interface QuestionCardProps {
     answer: string;
     difficulty: "beginner" | "intermediate" | "expert";
     summary: string;
-    note: string;
   };
   onDelete: (id: string) => void;
+  onEdit: (question: any) => void;
 }
 
-const QuestionCard: React.FC<QuestionCardProps> = ({ question, onDelete }) => {
+const QuestionCard: React.FC<QuestionCardProps> = ({ question, onDelete, onEdit }) => {
   const [flipped, setFlipped] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const userId = useSelector((state: RootState) => state.auth.user?._id);
 
-  const userId = useSelector((state: RootState) => {
-    return state.user.user?.userId;
-  });
-
+  const dispatch = useDispatch<AppDispatch>();
+  
   // Function to open the update modal
   const handleOpenModal = () => {
+    onEdit(question);
     setIsModalOpen(true);
   };
 
@@ -38,9 +39,11 @@ const QuestionCard: React.FC<QuestionCardProps> = ({ question, onDelete }) => {
   const onUpdateQuestion = async (newQuestion: any) => {
     if (!userId) {
       console.error("User is not logged in. Cannot update question.");
-      return;
+      return; // Optionally show a message to the user
     }
-
+  
+    console.log("Updating question with ID:", newQuestion.id); // Log the ID
+  
     try {
       const response = await fetch(`/api/questions/${newQuestion.id}`, {
         method: "PUT",
@@ -52,18 +55,20 @@ const QuestionCard: React.FC<QuestionCardProps> = ({ question, onDelete }) => {
           answer: newQuestion.answer,
           difficulty: newQuestion.difficulty,
           summary: newQuestion.summary,
-          note: newQuestion.notes.note, // Pass the note here
-          userId: userId,
+          userId: userId, // Pass the userId in the request body
         }),
       });
-
+  
       if (!response.ok) {
         const errorResponse = await response.json();
         throw new Error(errorResponse.message || "Failed to update question");
       }
-
+  
       const updatedQuestion = await response.json();
-      // Update the question state if needed
+  
+      // Dispatch the updateQuestion action with the updated question
+      dispatch(updateQuestionThunk(updatedQuestion));
+  
       setIsModalOpen(false); // Close modal after updating
     } catch (error) {
       console.error("Error updating question:", error);
@@ -90,8 +95,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({ question, onDelete }) => {
         throw new Error(errorResponse.message || "Failed to delete question");
       }
 
-      onDelete(question._id)
-
+      onDelete(question._id);
     } catch (error) {
       console.error("Error deleting question:", error);
     }
@@ -121,28 +125,18 @@ const QuestionCard: React.FC<QuestionCardProps> = ({ question, onDelete }) => {
             >
               Edit
             </button>
-            <button onClick={(e) => {
+            <button
+              onClick={(e) => {
                 e.stopPropagation(); // Prevent card flip when clicking the Edit button
-                handleDelete()}} className="mt-2 ml-5 text-blue-500">
+                handleDelete();
+              }}
+              className="mt-2 ml-5 text-blue-500"
+            >
               Delete
             </button>
           </div>
         </div>
       </div>
-      {isModalOpen && (
-        <UpdateQuestionForm
-          question={{
-            id: question._id, // Map _id to id
-            question: question.question,
-            answer: question.answer,
-            difficulty: question.difficulty,
-            summary: question.summary,
-            notes: { userId: userId || "", note: question.note },
-          }}
-          onClose={handleCloseModal}
-          onUpdateQuestion={onUpdateQuestion}
-        />
-      )}
     </>
   );
 };

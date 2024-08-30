@@ -31,6 +31,7 @@ const Login = () => {
     try {
       // Dispatch the login action
       const resultAction = await dispatch(login({ email, password }));
+      console.log("resultAction", resultAction)
 
       // Check if the login was successful
       if (login.fulfilled.match(resultAction)) {

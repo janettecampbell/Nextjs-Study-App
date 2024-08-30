@@ -1,8 +1,11 @@
-"use client"
+import { redirect } from "next/navigation";
 
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+export default function RootPage() {
+    redirect("/login"); 
 
-const Main = () => {
-  
+  return (
+    <div>
+      <h1>Welcome to the Study App!</h1>
+    </div>
+  );
 }

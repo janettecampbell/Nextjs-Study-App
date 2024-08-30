@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
-import Cookies from "js-cookie";
+import { setUser } from "./userSlice";
+import { AppDispatch } from "../store";
 
 // Define the types for the user and authentication state
 interface User {
@@ -20,8 +21,8 @@ interface AuthState {
 // Initial state of the auth slice
 const initialState: AuthState = {
   user: null,
-  token: Cookies.get("token") || null, // Retrieve token from cookies
-  isAuthenticated: !!Cookies.get("token"), // Check if token exists
+  token: null,
+  isAuthenticated: false,
   loading: false,
   error: null,
 };
@@ -30,18 +31,19 @@ const initialState: AuthState = {
 export const login = createAsyncThunk<
   { user: User; token: string }, // Return both user and token
   { email: string; password: string },
-  { rejectValue: string }
->("auth/login", async ({ email, password }, { rejectWithValue }) => {
+  { dispatch: AppDispatch; rejectValue: string }
+>("auth/login", async ({ email, password }, { dispatch, rejectWithValue }) => {
   try {
     const response = await axios.post("/api/auth/login", { email, password });
     const { user, token } = response.data;
+    console.log("Login API response user:", user);
 
-    // Store the token in cookies
-    Cookies.set("token", token, {
-      expires: 1, // Cookie will expire in 1 day
-      secure: process.env.NODE_ENV === "production", // Use secure cookies in production
-      path: "/",
-    });
+    // Set user in Redux state
+    dispatch(setUser({
+      _id: user._id,
+      name: user.name,
+      email: user.email
+    }));
 
     return { user, token }; // Return both user and token
   } catch (error: any) {
@@ -49,27 +51,27 @@ export const login = createAsyncThunk<
   }
 });
 
+// Asynchronous thunk action for logging out
 export const logoutAction = createAsyncThunk(
   "auth/logout",
   async (_, { dispatch }) => {
-    // Clear token from cookies and dispatch the logout action
-    Cookies.remove("token");
+    // Optionally, make an API call to handle server-side logout
+    await axios.post("/api/auth/logout");
+
+    // Dispatch the logout action to clear the state
     dispatch(authSlice.actions.logout());
   }
 );
 
+// Async action to load user data
 export const loadUser = createAsyncThunk(
   "auth/loadUser",
   async (_, { rejectWithValue }) => {
-    const token = Cookies.get("token");
-    if (!token) {
-      return rejectWithValue("No token found");
-    }
-
     try {
       const response = await axios.get("/api/auth/me", {
-        headers: { Authorization: `Bearer ${token}` },
+        withCredentials: true,
       });
+      console.log("User data loaded:", response.data.user);
       return response.data.user; // Return the user data
     } catch (error: any) {
       return rejectWithValue(
@@ -84,7 +86,8 @@ const authSlice = createSlice({
   name: "auth",
   initialState,
   reducers: {
-    setUser: (state, action) => {
+    setAuthUser: (state, action) => {
+      console.log("authSlice", state.user);
       state.user = action.payload.user;
       state.token = action.payload.token;
       state.isAuthenticated = true;
@@ -94,7 +97,6 @@ const authSlice = createSlice({
       state.token = null;
       state.isAuthenticated = false;
       state.error = null;
-      Cookies.remove("token"); // Clear token on logout
     },
   },
   extraReducers: (builder) => {
@@ -115,11 +117,12 @@ const authSlice = createSlice({
         state.error = action.payload || "Login failed";
       })
       .addCase(loadUser.fulfilled, (state, action) => {
+        console.log("Load user fulfilled with:", action.payload);
         state.user = action.payload; // Set the user state
         state.isAuthenticated = true; // Mark as authenticated
       })
-      // Handle errors if needed
       .addCase(loadUser.rejected, (state, action) => {
+        console.error("Load user rejected:", action.payload);
         state.user = null;
         state.isAuthenticated = false;
       });
@@ -127,5 +130,5 @@ const authSlice = createSlice({
 });
 
 // Exporting actions and reducer from the slice
-export const { setUser, logout } = authSlice.actions; // Export both actions
+export const { setAuthUser, logout } = authSlice.actions;
 export default authSlice.reducer;

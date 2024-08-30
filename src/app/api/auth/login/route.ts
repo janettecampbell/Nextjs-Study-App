@@ -24,15 +24,13 @@ export async function POST(req: Request) {
     }
 
     const token = jwt.sign(
-      { userId: user._id },
+      { _id: user._id, name: user.name, email: user.email },
       process.env.JWT_SECRET as string,
-      {
-        expiresIn: "1d", // Token is valid for 1 day
-      }
+      { expiresIn: '1d' } // expires in 1 day
     );
 
     const response = NextResponse.json(
-      { user: { name: user.name, email: user.email } },
+      { user: { _id: user._id, name: user.name, email: user.email }, token },
       { status: 200 }
     );
 

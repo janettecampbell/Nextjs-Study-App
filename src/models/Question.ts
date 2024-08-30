@@ -9,7 +9,6 @@ const QuestionSchema = new mongoose.Schema({
     required: true,
   },
   summary: { type: String, required: true },
-  notes: { userId: { type: String, unique: true }, note: { type: String } }, // One note per user ID
 });
 
 const Question = models.Question || model("Question", QuestionSchema);

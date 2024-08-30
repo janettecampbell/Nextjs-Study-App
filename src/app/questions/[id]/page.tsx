@@ -1,9 +1,14 @@
 "use client"
 import React, { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/redux/store';
 
 const QuestionDetails = ({ params }: { params: { id: string } }) => {
   const [question, setQuestion] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+
+  const userId = useSelector((state: RootState) => state.user.user?._id);
+  console.log("questions/[id]", userId);
 
   useEffect(() => {
     const fetchQuestion = async () => {
@@ -13,6 +18,7 @@ const QuestionDetails = ({ params }: { params: { id: string } }) => {
           throw new Error('Question not found');
         }
         const data = await response.json();
+        console.log(data)
         setQuestion(data);
       } catch (error) {
         console.error(error);

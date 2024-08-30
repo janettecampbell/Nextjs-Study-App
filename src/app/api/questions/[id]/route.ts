@@ -60,36 +60,51 @@ export async function GET(
 // Handle PUT request
 export async function PUT(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: { _id: string } }
 ) {
-  const { id } = params;
+  const { _id } = params;
 
   await connectToDatabase();
 
   try {
-    const { question, answer, difficulty, summary, userId, note } =
-      await req.json();
+    const payload = await req.json();
+    const { _id, question, answer, difficulty, summary } = payload;
 
-    // Update the question document
-    const updatedQuestion = await Question.findByIdAndUpdate(
-      id,
-      {
-        question,
-        answer,
-        difficulty,
-        summary,
-        notes: { userId, note },
-      },
-      { new: true }
-    );
+    console.log("Parsed payload:", {
+      _id:
+      question,
+      answer,
+      difficulty,
+      summary
+    });
 
-    if (!updatedQuestion) {
-      return NextResponse.json({ message: "Question not found" }, { status: 404 });
+    
+
+    // Find the existing question
+    const existingQuestion = await Question.findById(_id);
+    if (!existingQuestion) {
+      return NextResponse.json(
+        { message: "Question not found" },
+        { status: 404 }
+      );
     }
 
+    // Update other fields if provided
+    if (question) existingQuestion.question = question;
+    if (answer) existingQuestion.answer = answer;
+    if (difficulty) existingQuestion.difficulty = difficulty;
+    if (summary) existingQuestion.summary = summary;
+
+    // Save the updated question document
+    const updatedQuestion = await existingQuestion.save();
+
     return NextResponse.json(updatedQuestion);
-  } catch (error) {
-    return NextResponse.json({ message: "Error updating question", error }, { status: 500 });
+  } catch (error: any) {
+    console.error("Error updating question:", error.message);
+    return NextResponse.json(
+      { message: "Error updating question", error: error.message },
+      { status: 500 }
+    );
   }
 }
 

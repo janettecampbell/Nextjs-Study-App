@@ -7,7 +7,6 @@ interface Question {
   answer: string;
   difficulty: "beginner" | "intermediate" | "expert";
   summary?: string;
-  notes?: string;
 }
 
 interface QuestionsState {
@@ -35,10 +34,19 @@ export const fetchQuestions = createAsyncThunk(
 
 // Async thunk to add a new question
 export const addQuestion = createAsyncThunk<Question, Omit<Question, "_id">>(
-  'questions/addQuestion',
+  "questions/addQuestion",
   async (newQuestion) => {
-    const response = await axios.post('/api/questions', newQuestion);
+    const response = await axios.post("/api/questions", newQuestion);
     return response.data; // Ensure your API returns the newly added question
+  }
+);
+
+// Async thunk to update a question
+export const updateQuestionThunk = createAsyncThunk<Question, { id: string; data: Partial<Omit<Question, "_id">>; }>(
+  "questions/updateQuestion",
+  async ({ id, data }) => {
+    const response = await axios.put(`/api/questions/${id}`, data);
+    return response.data; // This should return the updated question
   }
 );
 
@@ -46,16 +54,29 @@ const questionsSlice = createSlice({
   name: "questions",
   initialState,
   reducers: {
-    updateQuestion: (state, action) => {
-      const index = state.items.findIndex((q) => q._id === action.payload._id);
-      state.items[index] = action.payload;
-    },
     deleteQuestion: (state, action) => {
       state.items = state.items.filter((q) => q._id !== action.payload);
     },
   },
   extraReducers: (builder) => {
     builder
+      .addCase(updateQuestionThunk.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(updateQuestionThunk.fulfilled, (state, action) => {
+        state.loading = false;
+        const index = state.items.findIndex(
+          (q) => q._id === action.payload._id
+        );
+        if (index !== -1) {
+          state.items[index] = { ...state.items[index], ...action.payload }; // Merging the updates
+        }
+      })
+      .addCase(updateQuestionThunk.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message || "Failed to update question";
+      })
       .addCase(fetchQuestions.pending, (state) => {
         state.status = "loading";
       })
@@ -78,11 +99,11 @@ const questionsSlice = createSlice({
       })
       .addCase(addQuestion.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message || 'Failed to add question';
+        state.error = action.error.message || "Failed to add question";
       });
   },
 });
 
-export const { updateQuestion, deleteQuestion } = questionsSlice.actions;
+export const { deleteQuestion } = questionsSlice.actions;
 
 export default questionsSlice.reducer;

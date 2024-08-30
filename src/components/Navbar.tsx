@@ -1,24 +1,34 @@
 // navbar.tsx
 "use client";
-import React from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { logoutAction } from '@/redux/slices/authSlice';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import React, { useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { logoutAction } from "@/redux/slices/authSlice";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { AppDispatch, RootState } from "@/redux/store";
+import { loadUser } from "@/redux/slices/authSlice";
 
 const Navbar = () => {
   const dispatch: AppDispatch = useDispatch();
   const router = useRouter();
-  const { user, isAuthenticated } = useSelector((state: RootState) => state.auth); 
+  const { user, isAuthenticated } = useSelector(
+    (state: RootState) => state.auth
+  );
+
+  useEffect(() => {
+    console.log("Navbar isAuthenticated", isAuthenticated);
+    if (!isAuthenticated) {
+      dispatch(loadUser());
+    }
+  }, [dispatch, isAuthenticated]);
 
   const handleLogout = async (): Promise<void> => {
     // Dispatch logout action
     await dispatch(logoutAction());
-    
+
     // Optionally, you can make an API call to your logout route here if needed
-    await fetch('/api/auth/logout', { method: 'POST' });
-    
+    await fetch("/api/auth/logout", { method: "POST" });
+
     // Redirect to login page after logout
     router.push("/login");
   };
@@ -32,8 +42,11 @@ const Navbar = () => {
         <div>
           {isAuthenticated ? (
             <>
-              <span className="mr-4">Welcome, {user?.name || 'User'}!</span>
-              <button onClick={handleLogout} className="bg-red-500 px-4 py-2 rounded">
+              <span className="mr-4">Welcome, {user?.name || "User"}!</span>
+              <button
+                onClick={handleLogout}
+                className="bg-red-500 px-4 py-2 rounded"
+              >
                 Logout
               </button>
             </>
@@ -42,9 +55,7 @@ const Navbar = () => {
               <Link href="/login" className="mr-4">
                 Login
               </Link>
-              <Link href="/signup">
-                Signup
-              </Link>
+              <Link href="/signup">Signup</Link>
             </>
           )}
         </div>
