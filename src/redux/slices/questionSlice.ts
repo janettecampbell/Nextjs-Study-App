@@ -37,7 +37,7 @@ export const addQuestion = createAsyncThunk<Question, Omit<Question, "_id">>(
   "questions/addQuestion",
   async (newQuestion) => {
     const response = await axios.post("/api/questions", newQuestion);
-    return response.data; // Ensure your API returns the newly added question
+    return response.data; // Ensure API returns the newly added question
   }
 );
 

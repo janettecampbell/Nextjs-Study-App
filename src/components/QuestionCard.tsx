@@ -18,60 +18,24 @@ interface QuestionCardProps {
   onEdit: (question: any) => void;
 }
 
-const QuestionCard: React.FC<QuestionCardProps> = ({ question, onDelete, onEdit }) => {
+const QuestionCard: React.FC<QuestionCardProps> = ({
+  question,
+  onDelete,
+  onEdit,
+}) => {
   const [flipped, setFlipped] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const userId = useSelector((state: RootState) => state.auth.user?._id);
 
-  const dispatch = useDispatch<AppDispatch>();
-  
   // Function to open the update modal
   const handleOpenModal = () => {
     onEdit(question);
     setIsModalOpen(true);
   };
 
-  // Function to close the modal
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-  };
-
-  const onUpdateQuestion = async (newQuestion: any) => {
-    if (!userId) {
-      console.error("User is not logged in. Cannot update question.");
-      return; // Optionally show a message to the user
-    }
-  
-    console.log("Updating question with ID:", newQuestion.id); // Log the ID
-  
-    try {
-      const response = await fetch(`/api/questions/${newQuestion.id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          question: newQuestion.question,
-          answer: newQuestion.answer,
-          difficulty: newQuestion.difficulty,
-          summary: newQuestion.summary,
-          userId: userId, // Pass the userId in the request body
-        }),
-      });
-  
-      if (!response.ok) {
-        const errorResponse = await response.json();
-        throw new Error(errorResponse.message || "Failed to update question");
-      }
-  
-      const updatedQuestion = await response.json();
-  
-      // Dispatch the updateQuestion action with the updated question
-      dispatch(updateQuestionThunk(updatedQuestion));
-  
-      setIsModalOpen(false); // Close modal after updating
-    } catch (error) {
-      console.error("Error updating question:", error);
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === "Enter") {
+      setFlipped(!flipped);
     }
   };
 
@@ -106,6 +70,9 @@ const QuestionCard: React.FC<QuestionCardProps> = ({ question, onDelete, onEdit 
       <div
         className={`card ${flipped ? "flipped" : ""}`}
         onClick={() => setFlipped(!flipped)}
+        onKeyDown={handleKeyDown}
+        tabIndex={0}
+        aria-label="flip card"
       >
         <div className="card-inner">
           <div className="card-front p-4 bg-white border rounded shadow">
@@ -127,7 +94,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({ question, onDelete, onEdit 
             </button>
             <button
               onClick={(e) => {
-                e.stopPropagation(); // Prevent card flip when clicking the Edit button
+                e.stopPropagation(); // Prevent card flip when clicking the Delete button
                 handleDelete();
               }}
               className="mt-2 ml-5 text-blue-500"
