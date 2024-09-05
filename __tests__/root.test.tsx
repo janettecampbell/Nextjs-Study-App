@@ -1,9 +1,17 @@
-import '@testing-library/jest-dom'
+import React from "react"
 import { render, screen } from '@testing-library/react'
-import Root from "@/app/page"
-import { describe } from 'node:test'
+import RootPage from "../src/app/page"
+import * as navigation from "next/navigation"
 
-describe("Root", () => {
-  render(<Root />)
-  
-})
+// Mock router
+jest.mock("next/navigation", () => ({
+  redirect: jest.fn(),
+}));
+
+describe("Root page redirected to login", () => {
+  it("Should redirect to /login", () => {
+    render(<RootPage />);
+
+    expect(navigation.redirect).toHaveBeenCalledWith("/login");
+  });
+});
