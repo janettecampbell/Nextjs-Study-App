@@ -98,11 +98,11 @@ const Home = () => {
   }, []);
 
   return (
-    <div className="container mx-auto p-4">
+    <main className="container mx-auto p-4">
       <button
         type="button"
         onClick={openModal}
-        className="p-2 bg-blue-500 text-white"
+        className="p-2 bg-blue-600 text-white"
       >
         Add Question
       </button>
@@ -160,7 +160,7 @@ const Home = () => {
           </div>
         </div>
       )}
-    </div>
+    </main>
   );
 };
 

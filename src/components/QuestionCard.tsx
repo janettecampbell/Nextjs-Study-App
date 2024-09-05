@@ -1,4 +1,6 @@
 "use client";
+
+import React from "react";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import Link from "next/link";
@@ -80,7 +82,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
           </div>
           <div className="card-back p-4 bg-gray-100 border rounded shadow">
             <p>{question.answer}</p>
-            <Link href={`/questions/${question._id}`} className="text-blue-500">
+            <Link href={`/questions/${question._id}`} className="text-blue-900">
               More
             </Link>
             <button
@@ -88,7 +90,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
                 e.stopPropagation(); // Prevent card flip when clicking the Edit button
                 handleOpenModal();
               }}
-              className="mt-2 ml-5 text-blue-500"
+              className="mt-2 ml-5 text-blue-900"
             >
               Edit
             </button>
@@ -97,7 +99,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
                 e.stopPropagation(); // Prevent card flip when clicking the Delete button
                 handleDelete();
               }}
-              className="mt-2 ml-5 text-blue-500"
+              className="mt-2 ml-5 text-blue-900"
             >
               Delete
             </button>

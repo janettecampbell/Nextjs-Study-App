@@ -34,7 +34,7 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="p-4 bg-blue-500 text-white">
+    <nav className="p-4 bg-blue-600 text-white">
       <div className="container mx-auto flex justify-between items-center">
         <Link href="/home" className="text-lg font-bold">
           Study App
@@ -45,7 +45,7 @@ const Navbar = () => {
               <span className="mr-4">Welcome, {user?.name || "User"}!</span>
               <button
                 onClick={handleLogout}
-                className="bg-red-500 px-4 py-2 rounded"
+                className="bg-red-700 px-4 py-2 rounded"
               >
                 Logout
               </button>
